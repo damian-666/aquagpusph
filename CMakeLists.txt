@@ -22,7 +22,7 @@
 # ===================================================== #
 # General CMake options                                 #
 # ===================================================== #
-cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
 project(AQUAgpusph)
 set(AQUAGPUSPH_VERSION "4.0.0")
 
@@ -85,10 +85,11 @@ MESSAGE(STATUS "examplesdir: ${CMAKE_INSTALL_EXAMPLESDIR}")
 # All the options for the build process                 #
 # ===================================================== #
 IF(NOT CMAKE_BUILD_TYPE)
-	SET(CMAKE_BUILD_TYPE "Release")
+    SET(CMAKE_BUILD_TYPE "Release")
 ENDIF(NOT CMAKE_BUILD_TYPE)
 OPTION(AQUAGPUSPH_3D "Build 3D AQUAgpusph version. 2D and 3D versions can be installed on the same system." ON)
-OPTION(AQUAGPUSPH_USE_NCURSES "Build AQUAgpusph with Ncurses terminal support." ON)
+OPTION(AQUAGPUSPH_USE_MPI "Build AQUAgpusph with MPI support, for multidevice running." ON)
+OPTION(AQUAGPUSPH_USE_NCURSES "Build AQUAgpusph with NCurses terminal support" OFF)
 OPTION(AQUAGPUSPH_USE_VTK "Build AQUAgpusph with VTK output format support (on development)." ON)
 OPTION(AQUAGPUSPH_BUILD_TOOLS "Build AQUAgpusph tools" ON)
 OPTION(AQUAGPUSPH_BUILD_EXAMPLES "Build AQUAgpusph examples" ON)
@@ -103,9 +104,9 @@ MARK_AS_ADVANCED(
 # ===================================================== #
 # 2D/3D
 IF(AQUAGPUSPH_3D)
-	ADD_DEFINITIONS(-DHAVE_3D)
+    ADD_DEFINITIONS(-DHAVE_3D)
 ELSE(AQUAGPUSPH_3D)
-	ADD_DEFINITIONS(-DHAVE_2D)
+    ADD_DEFINITIONS(-DHAVE_2D)
 ENDIF(AQUAGPUSPH_3D)
 
 # xxd
@@ -150,31 +151,41 @@ IF(NOT CLANG_FOUND)
 MESSAGE(FATAL_ERROR "libCLang not found, but ${PACKAGE_NAME} requires it. Please install libCLang!")
 ENDIF(NOT CLANG_FOUND)
 
+# MPI
+IF(AQUAGPUSPH_USE_MPI)
+    FIND_PACKAGE(MPI)
+    IF(NOT MPI_FOUND)
+        MESSAGE(FATAL_ERROR "MPI not found, but AQUAGPUSPH_USE_MPI is ON. Install MPI or set AQUAGPUSPH_USE_MPI=OFF")
+    ENDIF(NOT MPI_FOUND)
+
+    SET(HAVE_MPI TRUE)
+ENDIF(AQUAGPUSPH_USE_MPI)
+
 # NCURSES
 IF(AQUAGPUSPH_USE_NCURSES)
-	SET(CURSES_NEED_NCURSES TRUE)
-	FIND_PACKAGE(Curses)
-	IF(NOT CURSES_FOUND)
-		MESSAGE(FATAL_ERROR "Curses not found, but AQUAGPUSPH_USE_NCURSES is ON. Install Curses or set AQUAGPUSPH_USE_NCURSES=OFF")
-	ENDIF(NOT CURSES_FOUND)
+    SET(CURSES_NEED_NCURSES TRUE)
+    FIND_PACKAGE(Curses)
+    IF(NOT CURSES_FOUND)
+        MESSAGE(FATAL_ERROR "Curses not found, but AQUAGPUSPH_USE_NCURSES is ON. Install Curses or set AQUAGPUSPH_USE_NCURSES=OFF")
+    ENDIF(NOT CURSES_FOUND)
 
-	SET(HAVE_NCURSES TRUE)
+    SET(HAVE_NCURSES TRUE)
 ENDIF(AQUAGPUSPH_USE_NCURSES)
 
 # VTK
 IF(AQUAGPUSPH_USE_VTK)
-	FIND_PACKAGE(VTK)
-	IF(NOT VTK_FOUND)
-		MESSAGE(FATAL_ERROR "VTK not found, but AQUAGPUSPH_USE_VTK is ON. Install vtk or set AQUAGPUSPH_USE_VTK=OFF")
-	ELSE(NOT VTK_FOUND)
-		MESSAGE(STATUS "Found VTK ${VTK_VERSION}")
-	ENDIF(NOT VTK_FOUND)
+    FIND_PACKAGE(VTK)
+    IF(NOT VTK_FOUND)
+        MESSAGE(FATAL_ERROR "VTK not found, but AQUAGPUSPH_USE_VTK is ON. Install vtk or set AQUAGPUSPH_USE_VTK=OFF")
+    ELSE(NOT VTK_FOUND)
+        MESSAGE(STATUS "Found VTK ${VTK_VERSION}")
+    ENDIF(NOT VTK_FOUND)
 
-	IF(NOT VTK_LIBRARIES)
-		SET(VTK_LIBRARIES vtkCommon vtkHybrid vtkIO vtkFiltering)
-	ENDIF(NOT VTK_LIBRARIES)
+    IF(NOT VTK_LIBRARIES)
+        SET(VTK_LIBRARIES vtkCommon vtkHybrid vtkIO vtkFiltering)
+    ENDIF(NOT VTK_LIBRARIES)
 
-	SET(HAVE_VTK TRUE)
+    SET(HAVE_VTK TRUE)
 ENDIF(AQUAGPUSPH_USE_VTK)
 
 # Eigen3
@@ -193,7 +204,7 @@ ENDIF(NOT MUPARSER_FOUND)
 
 # GPU profile
 IF(AQUAGPUSPH_GPU_PROFILE)
-	ADD_DEFINITIONS(-DHAVE_GPUPROFILE)
+    ADD_DEFINITIONS(-DHAVE_GPUPROFILE)
 ENDIF(AQUAGPUSPH_GPU_PROFILE)
 
 
@@ -201,13 +212,13 @@ ENDIF(AQUAGPUSPH_GPU_PROFILE)
 # Search special packages needed to build doc           #
 # ===================================================== #
 IF(AQUAGPUSPH_BUILD_DOC)
-	FIND_PACKAGE(Doxygen)
-	IF(NOT DOXYGEN_FOUND)
-		MESSAGE(FATAL_ERROR "Doxygen not found, but AQUAGPUSPH_BUILD_DOC is ON. Install Doxygen or set AQUAGPUSPH_BUILD_DOC=OFF")
-	ENDIF(NOT DOXYGEN_FOUND)
-	IF(NOT DOXYGEN_DOT_FOUND)
-		MESSAGE(FATAL_ERROR "Graphviz not found, but AQUAGPUSPH_BUILD_DOC is ON. Install Graphviz or set AQUAGPUSPH_BUILD_DOC=OFF")
-	ENDIF(NOT DOXYGEN_DOT_FOUND)
+    FIND_PACKAGE(Doxygen)
+    IF(NOT DOXYGEN_FOUND)
+        MESSAGE(FATAL_ERROR "Doxygen not found, but AQUAGPUSPH_BUILD_DOC is ON. Install Doxygen or set AQUAGPUSPH_BUILD_DOC=OFF")
+    ENDIF(NOT DOXYGEN_FOUND)
+    IF(NOT DOXYGEN_DOT_FOUND)
+        MESSAGE(FATAL_ERROR "Graphviz not found, but AQUAGPUSPH_BUILD_DOC is ON. Install Graphviz or set AQUAGPUSPH_BUILD_DOC=OFF")
+    ENDIF(NOT DOXYGEN_DOT_FOUND)
 ENDIF(AQUAGPUSPH_BUILD_DOC)
 
 # ===================================================== #
@@ -245,47 +256,47 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/include ${CMAKE_SOURCE_DIR}/include)
 
 # check for 64-bit platform
 IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	MESSAGE(STATUS "Platform is 64-bit")
+    MESSAGE(STATUS "Platform is 64-bit")
 ELSE(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	MESSAGE(STATUS "Platform is 32-bit")
+    MESSAGE(STATUS "Platform is 32-bit")
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 
 IF(MSVC)
-	# set default compiler settings
-	#SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GF /GY")
-	SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DAQUA_DEBUG")
-	# set default libs
-	SET (CMAKE_C_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib SHFolder.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib ")
-	set (CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES}")
-	# set linker flag /nodefaultlib
-	set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB")
-	SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB")
+    # set default compiler settings
+    #SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GF /GY")
+    SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DAQUA_DEBUG")
+    # set default libs
+    SET (CMAKE_C_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib SHFolder.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib ")
+    set (CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES}")
+    # set linker flag /nodefaultlib
+    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB")
+    SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB")
 
-	# Mark 32 bit executables large address aware so they can use > 2GB address space
-	# NOTE: This setting only has an effect on machines with at least 3GB of RAM, although it sets the linker option it doesn't set the the linker switch 'Enable Large Addresses'
-	IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-		set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
-		SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
-	ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    # Mark 32 bit executables large address aware so they can use > 2GB address space
+    # NOTE: This setting only has an effect on machines with at least 3GB of RAM, although it sets the linker option it doesn't set the the linker switch 'Enable Large Addresses'
+    IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
+        SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
+    ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 ELSE(MSVC)
-	SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DAQUA_DEBUG")
-	MESSAGE(STATUS "DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
+    SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DAQUA_DEBUG")
+    MESSAGE(STATUS "DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
 ENDIF(MSVC)
 IF(MINGW)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mthreads")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthreads")
-	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mthreads -Wl,--export-all-symbols")
-	SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -mthreads -Wl,--export-all-symbols")
-	LINK_LIBRARIES(-lgdi32)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mthreads")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mthreads")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mthreads -Wl,--export-all-symbols")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -mthreads -Wl,--export-all-symbols")
+    LINK_LIBRARIES(-lgdi32)
 ENDIF(MINGW)
 # 0000661: cmake build on Mac OS: dealing with dylib versus so
 IF(APPLE)
-	SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+    SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 ENDIF(APPLE)
 IF(UNIX)
-	ADD_DEFINITIONS(-DUNIX)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+    ADD_DEFINITIONS(-DUNIX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 ENDIF(UNIX)
 
 # ===================================================== #
@@ -295,13 +306,13 @@ ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(resources)
 IF(AQUAGPUSPH_BUILD_TOOLS)
-	ADD_SUBDIRECTORY(tools)
+    ADD_SUBDIRECTORY(tools)
 ENDIF(AQUAGPUSPH_BUILD_TOOLS)
 IF(AQUAGPUSPH_BUILD_EXAMPLES)
-	ADD_SUBDIRECTORY(examples)
+    ADD_SUBDIRECTORY(examples)
 ENDIF(AQUAGPUSPH_BUILD_EXAMPLES)
 IF(AQUAGPUSPH_BUILD_DOC)
-	ADD_SUBDIRECTORY(doc)
+    ADD_SUBDIRECTORY(doc)
 ENDIF(AQUAGPUSPH_BUILD_DOC)
 
 # ===================================================== #
@@ -309,28 +320,28 @@ ENDIF(AQUAGPUSPH_BUILD_DOC)
 # ===================================================== #
 MESSAGE("=====================================================")
 IF(AQUAGPUSPH_3D)
-	MESSAGE("Target: AQUAgpusph")
+    MESSAGE("Target: AQUAgpusph")
 ELSE(AQUAGPUSPH_3D)
-	MESSAGE("Target: AQUAgpusph2D")
+    MESSAGE("Target: AQUAgpusph2D")
 ENDIF(AQUAGPUSPH_3D)
 MESSAGE("Binary destination: ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
 MESSAGE("Libraries destination: ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 MESSAGE("Resources destination: ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/resources")
 IF(AQUAGPUSPH_BUILD_EXAMPLES)
-	MESSAGE("Examples destination: ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/examples")
+    MESSAGE("Examples destination: ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/examples")
 ENDIF(AQUAGPUSPH_BUILD_EXAMPLES)
 IF(AQUAGPUSPH_BUILD_DOC)
-	MESSAGE("Documentation destination: ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DOCDIR}")
+    MESSAGE("Documentation destination: ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DOCDIR}")
 ENDIF(AQUAGPUSPH_BUILD_DOC)
 MESSAGE("OPTIONS:")
 IF(AQUAGPUSPH_USE_NCURSES)
-	MESSAGE("    - With NCurses")
+    MESSAGE("    - With NCurses")
 ELSE(AQUAGPUSPH_USE_NCURSES)
-	MESSAGE("    - Without NCurses")
+    MESSAGE("    - Without NCurses")
 ENDIF(AQUAGPUSPH_USE_NCURSES)
 IF(AQUAGPUSPH_USE_VTK)
-	MESSAGE("    - With VTK")
+    MESSAGE("    - With VTK")
 ELSE(AQUAGPUSPH_USE_VTK)
-	MESSAGE("    - Without VTK")
+    MESSAGE("    - Without VTK")
 ENDIF(AQUAGPUSPH_USE_VTK)
 MESSAGE("=====================================================")
