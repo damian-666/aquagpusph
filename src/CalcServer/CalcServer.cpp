@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 #include <limits>
+#include <assert.h>
 
 #include <CalcServer.h>
 #include <AuxiliarMethods.h>
@@ -81,6 +82,25 @@ CalcServer::CalcServer(const Aqua::InputOutput::ProblemSetup& sim_data)
 
     // Register default scalars
     std::ostringstream valstr;
+    int mpi_rank = 0, mpi_size = 1;
+    #ifdef HAVE_MPI
+        try {
+            mpi_rank = MPI::COMM_WORLD.Get_rank();
+            mpi_size = MPI::COMM_WORLD.Get_size();
+        } catch(MPI::Exception e){
+            std::ostringstream msg;
+            msg << "Error getting MPI rank and size. " << std::endl
+                << e.Get_error_code() << ": " << e.Get_error_string() << std::endl;
+            LOG(L_ERROR, msg.str());
+            throw;
+        }
+        assert(mpi_rank >= 0);
+        assert(mpi_size > 0);
+    #endif
+    valstr.str(""); valstr << mpi_rank;
+    _vars.registerVariable("mpi_rank", "unsigned int", "", valstr.str());
+    valstr.str(""); valstr << mpi_size;
+    _vars.registerVariable("mpi_size", "unsigned int", "", valstr.str());
     #ifdef HAVE_3D
         unsigned int dims = 3;
     #else
