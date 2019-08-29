@@ -12,6 +12,19 @@ ADD_CUSTOM_TARGET(opencl_embed ALL
     COMMAND echo " */" >> LinkList.cl
     COMMAND echo "" >> LinkList.cl
     COMMAND ${XXD_BIN} -i LinkList.cl.in >> LinkList.cl
+
+    COMMAND echo "/** @file" > MPISync.hcl
+    COMMAND echo " * @brief Hardcoded version of the file CalcServer/MPISync.hcl.in" >> MPISync.hcl
+    COMMAND echo " */" >> MPISync.hcl
+    COMMAND echo "" >> MPISync.hcl
+    COMMAND ${XXD_BIN} -i MPISync.hcl.in >> MPISync.hcl
+    COMMAND echo "/** @file" > MPISync.cl
+    COMMAND echo " * @brief Hardcoded version of the file CalcServer/MPISync.cl.in" >> MPISync.cl
+    COMMAND echo " */" >> MPISync.cl
+    COMMAND echo "" >> MPISync.cl
+    COMMAND ${XXD_BIN} -i MPISync.cl.in >> MPISync.cl
+    
+    
     COMMAND echo "/** @file" > RadixSort.hcl
     COMMAND echo " * @brief Hardcoded version of the file CalcServer/RadixSort.hcl.in" >> RadixSort.hcl
     COMMAND echo " */" >> RadixSort.hcl
