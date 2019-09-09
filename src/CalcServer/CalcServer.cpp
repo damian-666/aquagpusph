@@ -47,6 +47,7 @@
 
 #ifdef HAVE_MPI
 #include <mpi.h>
+#include <CalcServer/MPISync.h>
 #endif
 
 namespace Aqua{ namespace CalcServer{
@@ -268,6 +269,29 @@ CalcServer::CalcServer(const Aqua::InputOutput::ProblemSetup& sim_data)
             Assert *tool = new Assert(t->get("name"),
                                       t->get("condition"),
                                       once);
+            _tools.push_back(tool);
+        }
+        else if(!t->get("type").compare("mpi-sync")){
+            std::vector<std::string> fields = split(
+                replaceAllCopy(t->get("fields"), " ", ""),
+                ',');
+            std::vector<unsigned int> procs;
+            if(t->get("processes").compare("")) {
+                unsigned int val;
+                std::vector<std::string> exprs = split_formulae(
+                    t->get("processes"));
+                for(auto expr : exprs) {
+                    _vars.solve("unsigned int",
+                                expr,
+                                (void*)(&val));
+                    procs.push_back(val);
+                }
+            }
+            MPISync *tool = new MPISync(t->get("name"),
+                                        t->get("mask"),
+                                        fields,
+                                        procs,
+                                        once);
             _tools.push_back(tool);
         }
         else if(!t->get("type").compare("installable")){
