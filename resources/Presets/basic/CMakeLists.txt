@@ -19,6 +19,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/kernels/wendland.xml
     ${CMAKE_CURRENT_BINARY_DIR}/kernels/wendland.xml @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/MLS.xml
     ${CMAKE_CURRENT_BINARY_DIR}/MLS.xml @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/MPI_planes.xml
+    ${CMAKE_CURRENT_BINARY_DIR}/MPI_planes.xml @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/multiresolution.xml
     ${CMAKE_CURRENT_BINARY_DIR}/multiresolution.xml @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/multiresolution/cube.xml
@@ -54,6 +56,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/kernels/wendland.xml
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/kernels/wendland.xml @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/MLS.xml
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/MLS.xml @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/MPI_planes.xml
+    ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/MPI_planes.xml @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/multiresolution.xml
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/multiresolution.xml @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cMake/multiresolution/cube.xml
@@ -79,6 +83,7 @@ SET(RESOURCES_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/domain.xml
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/id_inverse.xml
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/MLS.xml
+    ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/MPI_planes.xml
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/multiresolution.xml
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/neighsLimit.xml
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CMakeTmp/noLocalMem.xml
