@@ -77,7 +77,7 @@ bool Tokenizer::registerVariable(const std::string name, float value)
         overwritten = true;
     }
     p.DefineConst(name, (mu::value_type)value);
-    return  overwritten;
+    return overwritten;
 }
 
 void Tokenizer::clearVariables()
@@ -139,7 +139,7 @@ float Tokenizer::solve(const std::string eq)
     {
         std::ostringstream msg;
         msg << "Error evaluating \"" << e.GetExpr() << "\"" << std::endl;
-        LOG(L_WARNING, msg.str());
+        LOG(L_ERROR, msg.str());
         msg.str("");
         msg << "\t" << e.GetMsg() << std::endl;
         LOG0(L_DEBUG, msg.str());
